@@ -1,0 +1,27 @@
+<idea-plugin>
+    <id>Quick Fix</id>
+    <name>Quick Fix</name>
+    <version>0.1</version>
+    <vendor email="dmitry.kandalov [at] gmail.com" url="https://github.com/dkandalov/quick-fix">Dmitry Kandalov</vendor>
+
+    <description><![CDATA[
+        Registers all available intentions as actions so you can assign shortcuts to them.
+        Adds "Quick Fix" action which applies the first available quick fix at the current location (equivalent to "alt+enter, enter").
+    ]]></description>
+
+    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
+    <idea-version since-build="203.5981.155"/>
+
+    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <actionConfigurationCustomizer implementation="quickfix.AddIntentionActions"/>
+    </extensions>
+
+    <actions>
+        <action class="quickfix.QuickFixAction" text="Quick Fix">
+            <keyboard-shortcut first-keystroke="F1" keymap="$default"/>
+        </action>
+    </actions>
+</idea-plugin>
