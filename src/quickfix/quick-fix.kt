@@ -8,7 +8,7 @@ import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.impl.ActionConfigurationCustomizer
+import com.intellij.openapi.actionSystem.impl.DynamicActionConfigurationCustomizer
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -35,22 +35,33 @@ class QuickFixAction : AnAction() {
     }
 }
 
-class AddIntentionActions : ActionConfigurationCustomizer {
-    override fun customize(actionManager: ActionManager) {
+class AddIntentionActions : DynamicActionConfigurationCustomizer {
+    private val actions by lazy {
         IntentionManager.getInstance().intentionActions
             .filter { it.canBeInvoked() }
             // Group by name because there are intentions with the same name,
             // e.g. "Put arguments on separate lines" for Java and Kotlin.
             .groupBy { it.familyName }
-            .forEach { (familyName, intentionActions) ->
+            .map { (familyName, intentionActions) ->
                 val actionId = "$familyName (Intention)"
-                val action = IntentionAsAction(actionId, intentionActions)
-                actionManager.registerAction(actionId, action)
+                IntentionAsAction(actionId, intentionActions)
             }
     }
 
+    override fun registerActions(actionManager: ActionManager) {
+        actions.forEach {
+            actionManager.registerAction(it.actionId, it)
+        }
+    }
+
+    override fun unregisterActions(actionManager: ActionManager) {
+        actions.forEach {
+            actionManager.unregisterAction(it.actionId)
+        }
+    }
+
     private class IntentionAsAction(
-        actionId: String,
+        val actionId: String,
         private val intentionActions: List<IntentionAction>
     ) : AnAction(actionId) {
         override fun actionPerformed(event: AnActionEvent) {
@@ -71,7 +82,6 @@ class AddIntentionActions : ActionConfigurationCustomizer {
 fun IntentionAction.canBeInvoked() =
     (this as? CustomizableIntentionAction)?.isSelectable ?: true &&
     (this as? IntentionActionDelegate)?.delegate !is AbstractEmptyIntentionAction
-
 
 val Project.currentFile: VirtualFile?
     get() = (FileEditorManagerEx.getInstance(this) as FileEditorManagerEx).currentFile
