@@ -59,23 +59,36 @@ class AddIntentionActions : DynamicActionConfigurationCustomizer {
             actionManager.unregisterAction(it.actionId)
         }
     }
+}
 
-    private class IntentionAsAction(
-        val actionId: String,
-        private val intentionActions: List<IntentionAction>
-    ) : AnAction(actionId) {
-        override fun actionPerformed(event: AnActionEvent) {
-            val project = event.project ?: return
-            val editor = project.currentEditor ?: return
-            val psiFile = project.currentPsiFile ?: return
+private class IntentionAsAction(val actionId: String, private val intentionActions: List<IntentionAction>) : AnAction(actionId) {
+    override fun actionPerformed(event: AnActionEvent) {
+        val project = event.project ?: return
+        val editor = project.currentEditor ?: return
+        val psiFile = project.currentPsiFile ?: return
 
-            intentionActions.forEach {
-                if (it.isAvailable(project, editor, psiFile)) {
-                    val commandName = StringUtil.capitalizeWords(it.text, true)
-                    ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, it, commandName)
-                }
+        intentionActions.forEach {
+            if (it.isAvailable(project, editor, psiFile)) {
+                val commandName = StringUtil.capitalizeWords(it.text, true)
+                ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, it, commandName)
             }
         }
+    }
+
+    override fun update(event: AnActionEvent) {
+        // There are few intentions that perform similar transformations and can benefit from having the same shortcut
+        // (for example, "Put arguments on one line" and "Put parameters on one line" in Kotlin).
+        // The code below sets action enabled status to make sure that the shortcut invokes the action
+        // which is actually available in the context.
+        // Otherwise, the action which is not available in the current context might be invoked and it will be a noop.
+        event.presentation.isEnabled = hasAvailableActions(event)
+    }
+
+    private fun hasAvailableActions(event: AnActionEvent): Boolean {
+        val project = event.project ?: return false
+        val editor = project.currentEditor ?: return false
+        val psiFile = project.currentPsiFile ?: return false
+        return intentionActions.any { it.isAvailable(project, editor, psiFile) }
     }
 }
 
