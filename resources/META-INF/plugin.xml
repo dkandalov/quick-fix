@@ -7,15 +7,20 @@
     <description><![CDATA[
         <ul>
             <li>Adds "Quick Fix" action to apply the first available quick fix (equivalent to pressing "alt+enter,
-                enter"). "Quick Fix" is assigned to "F1" so you might need to unassign "F1" from the "Context Help"
-                action.
+                enter").<br/>"Quick Fix" is assigned to "F1" so you might need to unassign "F1" from the "Context Help"
+                action. Sometimes the order of intentions is not ideal, so you can tell "Quick Fix" to (de)prioritise
+                intentions via "quickfix-plugin.intentionPriorities" property in "IDE Registry...", e.g. "*;Introduce
+                import alias;Introduce local variable" will push "Introduce import alias" and "Introduce local variable"
+                inspections to the end of the priority list so "Quick Fix" is less likely to invoke them.
             </li>
             <li>Registers all available intentions as actions so you can assign shortcuts to them
-                (see <a href="https://youtrack.jetbrains.com/issue/IDEA-217465">this youtrack issue</a>).
-                For example, if you have Java or Kotlin plugin enabled, you can use "Find Action" to search
-                for "put arguments".
-                The search results should include "Put arguments on one line (Intention)" line on which you can
-                "alt+enter" and specify your own shortcut for this intention.
+                (see <a href="https://youtrack.jetbrains.com/issue/IDEA-217465">this youtrack issue</a>). <br/>
+                For example, if you have Java or Kotlin plugin enabled, you can use "Help -> Find Action" to search for
+                "put arguments" (please remember to include disabled actions into the search). The search results will
+                include "Put arguments on one line (Intention)" line on which you can "alt+enter" and specify your own
+                shortcut. You can also find the same action in "Preferences -> Keymap". Note that there are actually two
+                "Put arguments on one line" intentions one for Java and one for Kotlin. The action will invoke quickfix
+                from the first intention which is available in the current context.
             </li>
         </ul>
         ]]>
