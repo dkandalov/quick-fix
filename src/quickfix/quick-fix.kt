@@ -39,6 +39,8 @@ class QuickFixAction : AnAction() {
         ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, fix.action, commandName)
     }
 
+    // It would be ideal to reorder intentions as they are displayed in the alt+enter popup,
+    // however, this is currently not supported by IntelliJ API.
     private fun IntentionActionWithTextCaching.quickFixPriority(): Int =
         intentionPriorities[action.text] ?: (intentionPriorities["*"] ?: -1)
 
