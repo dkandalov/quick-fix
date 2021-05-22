@@ -1,3 +1,5 @@
+![Build Status](https://github.com/dkandalov/quick-fix/workflows/CI/badge.svg)
+
 This is a plugin for IntelliJ IDEs which:
 1. Adds `Quick Fix` action to apply the first available quick fix (equivalent to pressing `alt+enter, enter`).<br/>
   `Quick Fix` is assigned to `F1` so you might need to unassign `F1` from the `Context Help` action. If the order of intentions as they appear in alt+enter popup is not ideal, you can tell `Quick Fix` to (de)prioritise intentions via `quickfix-plugin.intentionPriorities` property in `IDE Registry...`. For example, `*;Introduce import alias;Introduce local variable` will push "Introduce import alias" and "Introduce local variable" inspections to the end of `QuickFix` priority list, so they are less likely to be invoked.
