@@ -1,4 +1,4 @@
-![Build Status](https://github.com/dkandalov/quick-fix/workflows/CI/badge.svg)
+[![Build Status](https://github.com/dkandalov/quick-fix/workflows/CI/badge.svg)](https://github.com/dkandalov/quick-fix/actions)
 
 This is a plugin for IntelliJ IDEs which:
 1. Adds `Quick Fix` action to apply the first available quick fix (equivalent to pressing `alt+enter, enter`).<br/>
