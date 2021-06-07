@@ -1,8 +1,8 @@
 package quickfix
 
+import com.intellij.codeInsight.daemon.impl.HighlightInfo.IntentionActionDescriptor
 import com.intellij.codeInsight.intention.*
 import com.intellij.codeInsight.intention.impl.CachedIntentions
-import com.intellij.codeInsight.intention.impl.IntentionActionWithTextCaching
 import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -28,21 +28,34 @@ class QuickFixAction : AnAction() {
         val editor = project.currentEditor ?: return
         val psiFile = project.currentPsiFile ?: return
 
-        // Based on com.intellij.analysis.problemsView.toolWindow.ShowQuickFixesAction
+        // The code below is roughly based on com.intellij.analysis.problemsView.toolWindow.ShowQuickFixesAction
+        // It would be ideal to reorder intentions in the alt+enter popup,
+        // however, this is currently not supported by IntelliJ API.
+
         @Suppress("UnstableApiUsage")
-        val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile)
+        val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile).also {
+            // Sort all intentions separately so that e.g. errors always come first regardless of sorting.
+            it.errorFixesToShow.sortByQuickFixPriority()
+            it.inspectionFixesToShow.sortByQuickFixPriority()
+            it.intentionsToShow.sortByQuickFixPriority()
+            it.guttersToShow.sortByQuickFixPriority()
+            it.notificationActionsToShow.sortByQuickFixPriority()
+        }
+
         val cachedIntentions = CachedIntentions.createAndUpdateActions(project, psiFile, editor, intentionsInfo)
-        val fix = cachedIntentions.allActions.sortedBy { it.quickFixPriority() }
-            .firstOrNull { it.action.canBeInvoked() } ?: return
+        val fix = cachedIntentions.allActions.firstOrNull { it.action.canBeInvoked() } ?: return
 
         val commandName = StringUtil.capitalizeWords(fix.action.text, true)
         ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, fix.action, commandName)
     }
 
-    // It would be ideal to reorder intentions as they are displayed in the alt+enter popup,
-    // however, this is currently not supported by IntelliJ API.
-    private fun IntentionActionWithTextCaching.quickFixPriority(): Int =
-        intentionPriorities[action.text] ?: (intentionPriorities["*"] ?: -1)
+    private fun MutableList<IntentionActionDescriptor>.sortByQuickFixPriority() {
+        if (isEmpty()) return
+        val sorted = sortedBy { intentionPriorities[it.action.text] ?: (intentionPriorities["*"] ?: -1) }
+        // Using mutable API because ShowIntentionsPass.IntentionsInfo kind of enforces it.
+        clear()
+        addAll(sorted)
+    }
 
     companion object {
         private val registryValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
