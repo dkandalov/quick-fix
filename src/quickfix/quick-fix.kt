@@ -35,11 +35,11 @@ class QuickFixAction : AnAction() {
         @Suppress("UnstableApiUsage")
         val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile).also {
             // Sort all intentions separately so that e.g. errors always come first regardless of sorting.
-            it.errorFixesToShow.sortByQuickFixPriority()
-            it.inspectionFixesToShow.sortByQuickFixPriority()
-            it.intentionsToShow.sortByQuickFixPriority()
-            it.guttersToShow.sortByQuickFixPriority()
-            it.notificationActionsToShow.sortByQuickFixPriority()
+            it.errorFixesToShow.sortWithQuickFixPriority()
+            it.inspectionFixesToShow.sortWithQuickFixPriority()
+            it.intentionsToShow.sortWithQuickFixPriority()
+            it.guttersToShow.sortWithQuickFixPriority()
+            it.notificationActionsToShow.sortWithQuickFixPriority()
         }
 
         val cachedIntentions = CachedIntentions.createAndUpdateActions(project, psiFile, editor, intentionsInfo)
@@ -49,29 +49,30 @@ class QuickFixAction : AnAction() {
         ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, fix.action, commandName)
     }
 
-    private fun MutableList<IntentionActionDescriptor>.sortByQuickFixPriority() {
-        if (isEmpty()) return
-        val sorted = sortedBy { intentionPriorities[it.action.text] ?: (intentionPriorities["*"] ?: -1) }
-        // Using mutable API because ShowIntentionsPass.IntentionsInfo kind of enforces it.
-        clear()
-        addAll(sorted)
-    }
-
     companion object {
         private val registryValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
-            it.addListener(object : RegistryValueListener {
+            val listener = object : RegistryValueListener {
                 override fun afterValueChanged(value: RegistryValue) {
-                    intentionPriorities = it.toIntentionPriorityMap()
+                    intentionPriorities = value.toIntentionPriorityMap()
                 }
-            }, ApplicationManager.getApplication())
+            }
+            it.addListener(listener, ApplicationManager.getApplication())
         }
+
+        private var intentionPriorities = registryValue.toIntentionPriorityMap()
 
         private fun RegistryValue.toIntentionPriorityMap() =
             asString().split(";")
                 .mapIndexed { index, value -> value to index }
                 .toMap()
 
-        private var intentionPriorities = registryValue.toIntentionPriorityMap()
+        private fun MutableList<IntentionActionDescriptor>.sortWithQuickFixPriority() {
+            if (isEmpty()) return
+            val sorted = sortedBy { intentionPriorities[it.action.text] ?: (intentionPriorities["*"] ?: -1) }
+            // Using mutable API because ShowIntentionsPass.IntentionsInfo kind of enforces it.
+            clear()
+            addAll(sorted)
+        }
     }
 }
 
