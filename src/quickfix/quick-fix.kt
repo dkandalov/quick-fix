@@ -1,8 +1,8 @@
 package quickfix
 
-import com.intellij.codeInsight.daemon.impl.HighlightInfo.IntentionActionDescriptor
 import com.intellij.codeInsight.intention.*
 import com.intellij.codeInsight.intention.impl.CachedIntentions
+import com.intellij.codeInsight.intention.impl.IntentionActionWithTextCaching
 import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -33,17 +33,17 @@ class QuickFixAction : AnAction() {
         // however, this is currently not supported by IntelliJ API.
 
         @Suppress("UnstableApiUsage")
-        val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile).also {
-            // Sort all intentions separately so that e.g. errors always come first regardless of sorting.
-            it.errorFixesToShow.sortWithQuickFixPriority()
-            it.inspectionFixesToShow.sortWithQuickFixPriority()
-            it.intentionsToShow.sortWithQuickFixPriority()
-            it.guttersToShow.sortWithQuickFixPriority()
-            it.notificationActionsToShow.sortWithQuickFixPriority()
-        }
-
+        val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile)
         val cachedIntentions = CachedIntentions.createAndUpdateActions(project, psiFile, editor, intentionsInfo)
-        val fix = cachedIntentions.allActions.firstOrNull { it.action.canBeInvoked() } ?: return
+
+        val fix = cachedIntentions.allActions
+            // Sort all intentions separately so that e.g. errors always come first regardless of sorting.
+            .reorderSublist(cachedIntentions.errorFixes.sortedBy { it.quickFixPriority() })
+            .reorderSublist(cachedIntentions.inspectionFixes.sortedBy { it.quickFixPriority() })
+            .reorderSublist(cachedIntentions.intentions.sortedBy { it.quickFixPriority() })
+            .reorderSublist(cachedIntentions.gutters.sortedBy { it.quickFixPriority() })
+            .reorderSublist(cachedIntentions.notifications.sortedBy { it.quickFixPriority() })
+            .firstOrNull { it.action.canBeInvoked() } ?: return
 
         val commandName = StringUtil.capitalizeWords(fix.action.text, true)
         ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, fix.action, commandName)
@@ -66,13 +66,8 @@ class QuickFixAction : AnAction() {
                 .mapIndexed { index, value -> value to index }
                 .toMap()
 
-        private fun MutableList<IntentionActionDescriptor>.sortWithQuickFixPriority() {
-            if (isEmpty()) return
-            val sorted = sortedBy { intentionPriorities[it.action.text] ?: (intentionPriorities["*"] ?: -1) }
-            // Using mutable API because ShowIntentionsPass.IntentionsInfo kind of enforces it.
-            clear()
-            addAll(sorted)
-        }
+        private fun IntentionActionWithTextCaching.quickFixPriority() =
+            intentionPriorities[action.text] ?: (intentionPriorities["*"] ?: -1)
     }
 }
 
@@ -151,3 +146,16 @@ val VirtualFile.document: Document?
 
 val Project.currentDocument: Document?
     get() = currentFile?.document
+
+fun <T> List<T>.reorderSublist(order: List<T>): List<T> {
+    if (order.isEmpty()) return this
+    val (indices, values) = indices.zip(this)
+        .filter { (_, value) -> value in order }
+        .unzip()
+    val sortedValues = values.sortedBy { order.indexOf(it) }
+    val result = ArrayList(this)
+    indices.zip(sortedValues).forEach { (index, value) ->
+        result[index] = value
+    }
+    return result
+}
