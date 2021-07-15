@@ -3,7 +3,6 @@ buildscript {
 	repositories {
 		mavenCentral()
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-		maven { url "http://dl.bintray.com/jetbrains/intellij-plugin-service" }
 	}
 }
 plugins {
@@ -25,11 +24,11 @@ dependencies {
 
 sourceSets {
 	main {
-		kotlin { srcDir "./src" }
-		resources { srcDir "./resources" }
+		kotlin.srcDir "src"
+		resources.srcDir "resources"
 	}
 	test {
-		kotlin { srcDir "./test" }
+		kotlin.srcDir "test"
 	}
 }
 
