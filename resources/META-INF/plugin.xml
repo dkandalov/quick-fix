@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>Quick Fix</id>
     <name>Quick Fix</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <vendor email="dmitry.kandalov [at] gmail.com" url="https://github.com/dkandalov/quick-fix">Dmitry Kandalov</vendor>
 
     <description><![CDATA[
