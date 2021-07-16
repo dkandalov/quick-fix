@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package quickfix
 
 import com.intellij.codeInsight.intention.*
@@ -7,6 +9,7 @@ import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.UpdateInBackground
 import com.intellij.openapi.actionSystem.impl.DynamicActionConfigurationCustomizer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
@@ -97,7 +100,10 @@ class AddIntentionActions : DynamicActionConfigurationCustomizer {
     }
 }
 
-private class IntentionAsAction(val actionId: String, private val intentionActions: List<IntentionAction>) : AnAction(actionId) {
+private class IntentionAsAction(
+    val actionId: String,
+    private val intentionActions: List<IntentionAction>
+) : AnAction(actionId), UpdateInBackground {
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
         val editor = project.currentEditor ?: return
