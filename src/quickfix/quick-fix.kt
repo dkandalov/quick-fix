@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 package quickfix
 
 import com.intellij.codeInsight.intention.*
@@ -12,9 +10,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.UpdateInBackground
 import com.intellij.openapi.actionSystem.impl.DynamicActionConfigurationCustomizer
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.registry.Registry
@@ -100,6 +96,7 @@ class AddIntentionActions : DynamicActionConfigurationCustomizer {
     }
 }
 
+@Suppress("UnstableApiUsage") // Remove, because UpdateInBackground is stable in later IJ versions.
 private class IntentionAsAction(
     val actionId: String,
     private val intentionActions: List<IntentionAction>
@@ -146,12 +143,6 @@ val Project.currentPsiFile: PsiFile?
 
 val Project.currentEditor: Editor?
     get() = (FileEditorManagerEx.getInstance(this) as FileEditorManagerEx).selectedTextEditor
-
-val VirtualFile.document: Document?
-    get() = FileDocumentManager.getInstance().getDocument(this)
-
-val Project.currentDocument: Document?
-    get() = currentFile?.document
 
 fun <T> List<T>.reorderSublist(order: List<T>): List<T> {
     if (order.isEmpty()) return this
