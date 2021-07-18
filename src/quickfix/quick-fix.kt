@@ -7,25 +7,23 @@ import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
+import com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE
 import com.intellij.openapi.actionSystem.UpdateInBackground
 import com.intellij.openapi.actionSystem.impl.DynamicActionConfigurationCustomizer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.util.registry.RegistryValue
 import com.intellij.openapi.util.registry.RegistryValueListener
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
 
 class QuickFixAction : AnAction() {
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
-        val editor = project.currentEditor ?: return
-        val psiFile = project.currentPsiFile ?: return
+        val editor = event.currentEditor ?: return
+        val psiFile = event.currentPsiFile ?: return
 
         // The code below is roughly based on com.intellij.analysis.problemsView.toolWindow.ShowQuickFixesAction
         // It would be ideal to reorder intentions in the alt+enter popup,
@@ -103,8 +101,8 @@ private class IntentionAsAction(
 ) : AnAction(actionId), UpdateInBackground {
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
-        val editor = project.currentEditor ?: return
-        val psiFile = project.currentPsiFile ?: return
+        val editor = event.currentEditor ?: return
+        val psiFile = event.currentPsiFile ?: return
 
         intentionActions.forEach {
             if (it.isAvailable(project, editor, psiFile)) {
@@ -125,24 +123,21 @@ private class IntentionAsAction(
 
     private fun hasAvailableActions(event: AnActionEvent): Boolean {
         val project = event.project ?: return false
-        val editor = project.currentEditor ?: return false
-        val psiFile = project.currentPsiFile ?: return false
+        val editor = event.currentEditor ?: return false
+        val psiFile = event.currentPsiFile ?: return false
         return intentionActions.any { it.isAvailable(project, editor, psiFile) }
     }
 }
 
-fun IntentionAction.canBeInvoked() =
+private fun IntentionAction.canBeInvoked() =
     (this as? CustomizableIntentionAction)?.isSelectable ?: true &&
     (this as? IntentionActionDelegate)?.delegate !is AbstractEmptyIntentionAction
 
-val Project.currentFile: VirtualFile?
-    get() = (FileEditorManagerEx.getInstance(this) as FileEditorManagerEx).currentFile
+private val AnActionEvent.currentPsiFile: PsiFile?
+    get() = getData(PSI_FILE)
 
-val Project.currentPsiFile: PsiFile?
-    get() = currentFile?.let { PsiManager.getInstance(this).findFile(it) }
-
-val Project.currentEditor: Editor?
-    get() = (FileEditorManagerEx.getInstance(this) as FileEditorManagerEx).selectedTextEditor
+private val AnActionEvent.currentEditor: Editor?
+    get() = getData(EDITOR)
 
 fun <T> List<T>.reorderSublist(order: List<T>): List<T> {
     if (order.isEmpty()) return this
