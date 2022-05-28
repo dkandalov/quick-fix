@@ -1,7 +1,7 @@
 package quickfix
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
 
 class ReorderSublistTests {
     @Test fun `empty list`() {
@@ -24,6 +24,6 @@ class ReorderSublistTests {
     }
 }
 
-private infix fun Any.shouldEqual(that: Any) {
-    assertEquals(actual = this, expected = that)
+private infix fun Any.shouldEqual(expected: Any) {
+    assertEquals(expected, this)
 }

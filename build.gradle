@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-	testCompile "junit:junit:4.11" // also includes hamcrest-core
+	testCompile 'junit:junit:4.13.2' // also includes hamcrest-core
 }
 
 sourceSets {
