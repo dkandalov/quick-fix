@@ -2,10 +2,16 @@
 
 This is a plugin for IntelliJ IDEs which:
 1. Adds `Quick Fix` action to apply the first available quick fix (equivalent to pressing `alt+enter, enter`).<br/>
-  `Quick Fix` is assigned to `F1` so you might need to unassign `F1` from the `Context Help` action. If the order of intentions as they appear in alt+enter popup is not ideal, you can tell `Quick Fix` to (de)prioritise intentions via `quickfix-plugin.intentionPriorities` property in `IDE Registry...`. For example, `*;Introduce import alias;Introduce local variable` will push "Introduce import alias" and "Introduce local variable" inspections to the end of `QuickFix` priority list, so they are less likely to be invoked.
+  `Quick Fix` is assigned to `F1` so you might need to unassign `F1` from the `Context Help` action.
 2. Registers all available intentions as actions, so you can assign shortcuts to them 
   (see [this youtrack issue](https://youtrack.jetbrains.com/issue/IDEA-217465)). <br/>
   For example, if you have Java or Kotlin plugin enabled, you can use `Help -> Find Action` to search for "put arguments" (please remember to include disabled actions into the search). The search results will include "Put arguments on one line (Intention)" line on which you can `alt+enter` and specify your own shortcut. You can also find the same action in `Preferences -> Keymap`. Note that there are actually two "Put arguments on one line" intentions one for Java and one for Kotlin. The action will invoke quickfix from the first intention which is available in the current context.
+
+### De-Prioritising Intentions
+If the order of intentions as they appear in alt+enter popup is not ideal, you can tell `Quick Fix` to (de)prioritise intentions.  
+For that, open `Search Everywhere` and search for `Registry`.  
+There will be a key called `quickfix-plugin.intentionPriorities` which can be configured by setting a value.  
+Example: `*;Introduce import alias;Introduce local variable` will push "Introduce import alias" and "Introduce local variable" inspections to the end of `QuickFix` priority list, so they are less likely to be invoked.
 
 ### What's wrong with alt+enter?
 Pressing `alt+enter, enter` is too many key presses when you already know that the top inspection is going to do what you want.
