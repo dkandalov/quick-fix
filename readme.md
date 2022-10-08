@@ -10,7 +10,7 @@ This is a plugin for IntelliJ IDEs which:
 ### De-Prioritising Intentions
 If the order of intentions as they appear in alt+enter popup is not ideal, you can tell `Quick Fix` to (de)prioritise intentions.  
 For that, open `Search Everywhere` and search for `Registry`.  
-There will be a key called `quickfix-plugin.intentionPriorities` which can be used to configured.  
+There will be a key called `quickfix-plugin.intentionPriorities` which can be configured by setting a value.  
 Example: `*;Introduce import alias;Introduce local variable` will push "Introduce import alias" and "Introduce local variable" inspections to the end of `QuickFix` priority list, so they are less likely to be invoked.
 
 ### What's wrong with alt+enter?
