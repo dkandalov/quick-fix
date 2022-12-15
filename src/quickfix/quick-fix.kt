@@ -5,11 +5,11 @@ import com.intellij.codeInsight.intention.impl.CachedIntentions
 import com.intellij.codeInsight.intention.impl.IntentionActionWithTextCaching
 import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionUpdateThread.BGT
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE
-import com.intellij.openapi.actionSystem.UpdateInBackground
 import com.intellij.openapi.actionSystem.impl.DynamicActionConfigurationCustomizer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
@@ -101,11 +101,10 @@ class AddIntentionActions : DynamicActionConfigurationCustomizer {
     }
 }
 
-@Suppress("UnstableApiUsage") // Remove, because UpdateInBackground is stable in later IJ versions.
 private class IntentionAsAction(
     val actionId: String,
     private val intentionActions: List<IntentionAction>
-) : AnAction(actionId), UpdateInBackground {
+) : AnAction(actionId) {
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
         val editor = event.currentEditor ?: return
@@ -118,6 +117,8 @@ private class IntentionAsAction(
             }
         }
     }
+
+    override fun getActionUpdateThread() = BGT
 
     override fun update(event: AnActionEvent) {
         // There are few intentions that perform similar transformations and can benefit from having the same shortcut

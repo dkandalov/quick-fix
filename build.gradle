@@ -47,7 +47,7 @@ intellij {
 	// To find available IDE versions see https://www.jetbrains.com/intellij-repository/releases
 	// and https://www.jetbrains.com/intellij-repository/snapshots
 	version = System.getenv().getOrDefault("IJ_VERSION",
-			"203.5981.155", // Version which contains CustomizableIntentionAction
+			"222.3345.118", // Version which contains ActionUpdateThread
 //			"LATEST-EAP-SNAPSHOT"
 	)
 	downloadSources = true
