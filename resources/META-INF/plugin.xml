@@ -33,7 +33,6 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <dynamicActionConfigurationCustomizer implementation="quickfix.AddIntentionActions"/>
         <registryKey key="quickfix-plugin.intentionPriorities" defaultValue="" description="..."/>
     </extensions>
 
