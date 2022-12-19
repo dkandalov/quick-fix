@@ -4,11 +4,13 @@ import com.intellij.codeInsight.intention.*
 import com.intellij.codeInsight.intention.impl.CachedIntentions
 import com.intellij.codeInsight.intention.impl.IntentionActionWithTextCaching
 import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.util.registry.RegistryValue
@@ -50,25 +52,33 @@ class QuickFixAction : AnAction() {
         ShowIntentionActionsHandler.chooseActionAndInvoke(psiFile, editor, fix.action, commandName)
     }
 
-    companion object {
-        private val registryValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
-            val listener = object : RegistryValueListener {
-                override fun afterValueChanged(value: RegistryValue) {
-                    intentionPriorities = value.toIntentionPriorityMap()
-                }
+    private val quickFixConfig = service<QuickFixConfig>()
+
+    private fun IntentionActionWithTextCaching.quickFixPriority() =
+        quickFixConfig.priorityOf(action.text)
+}
+
+@Service
+class QuickFixConfig : Disposable {
+    private val registryValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
+        it.addListener(object : RegistryValueListener {
+            override fun afterValueChanged(value: RegistryValue) {
+                intentionPriorities = value.toIntentionPriorityMap()
             }
-            it.addListener(listener, ApplicationManager.getApplication())
-        }
+        }, this)
+    }
 
-        private var intentionPriorities = registryValue.toIntentionPriorityMap()
+    private var intentionPriorities = registryValue.toIntentionPriorityMap()
 
-        private fun RegistryValue.toIntentionPriorityMap() =
-            asString().split(";")
-                .mapIndexed { index, value -> value to index }
-                .toMap()
+    fun priorityOf(intentionName: String): Int =
+        intentionPriorities[intentionName] ?: (intentionPriorities["*"] ?: -1)
 
-        private fun IntentionActionWithTextCaching.quickFixPriority() =
-            intentionPriorities[action.text] ?: (intentionPriorities["*"] ?: -1)
+    private fun RegistryValue.toIntentionPriorityMap() =
+        asString().split(";")
+            .mapIndexed { index, value -> value to index }
+            .toMap()
+
+    override fun dispose() {
     }
 }
 
