@@ -1,7 +1,9 @@
 package quickfix
 
-import com.intellij.codeInsight.intention.*
-import com.intellij.codeInsight.intention.impl.CachedIntentions
+import com.intellij.codeInsight.intention.AbstractEmptyIntentionAction
+import com.intellij.codeInsight.intention.CustomizableIntentionAction
+import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.codeInsight.intention.IntentionActionDelegate
 import com.intellij.codeInsight.intention.impl.IntentionActionWithTextCaching
 import com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler
 import com.intellij.openapi.Disposable
@@ -29,8 +31,7 @@ class QuickFixAction : AnAction() {
         // however, this is currently not supported by IntelliJ API.
 
         @Suppress("UnstableApiUsage")
-        val intentionsInfo = ShowIntentionActionsHandler.calcIntentions(project, editor, psiFile)
-        val cachedIntentions = CachedIntentions.createAndUpdateActions(project, psiFile, editor, intentionsInfo)
+        val cachedIntentions = ShowIntentionActionsHandler.calcCachedIntentions(project, editor, psiFile)
 
         // The code below is a bit convoluted because it's trying to:
         //  - keep intentions overall in the same order as in UI, i.e. as returned by `cachedIntentions.allActions`
