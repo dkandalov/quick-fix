@@ -8,7 +8,7 @@ buildscript {
 	}
 }
 plugins {
-	id "org.jetbrains.intellij" version "1.13.3"
+	id "org.jetbrains.intellij" version "1.16.0"
 	id "org.jetbrains.kotlin.jvm" version "1.8.21"
 }
 apply plugin:"java"
@@ -52,8 +52,8 @@ intellij {
 	// To find available IDE versions see https://www.jetbrains.com/intellij-repository/releases
 	// and https://www.jetbrains.com/intellij-repository/snapshots
 	version = System.getenv().getOrDefault("IJ_VERSION",
-//			"222.3345.118", // Version which contains ActionUpdateThread
-			"LATEST-EAP-SNAPSHOT"
+			"233.9802-EAP-CANDIDATE-SNAPSHOT", // Version which has ShowIntentionActionsHandler.calcCachedIntentions()
+//			"LATEST-EAP-SNAPSHOT"
 	)
 	downloadSources = true
 	sameSinceUntilBuild = false
