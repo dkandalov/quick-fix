@@ -1,20 +1,9 @@
 import static org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
 
-buildscript {
-	ext.kotlin_version = "1.8.21"
-	repositories {
-		mavenCentral()
-		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-	}
-}
 plugins {
 	id "org.jetbrains.intellij" version "1.16.0"
 	id "org.jetbrains.kotlin.jvm" version "1.8.21"
 }
-apply plugin:"java"
-apply plugin:"kotlin"
-apply plugin:"idea"
-apply plugin:"org.jetbrains.intellij"
 
 repositories {
 	mavenCentral()
@@ -38,7 +27,6 @@ kotlin {
 	jvmToolchain(17)
 }
 compileKotlin {
-    // See also https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
 	compilerOptions {
 		apiVersion.set(KOTLIN_1_8)
 		languageVersion.set(KOTLIN_1_8)
