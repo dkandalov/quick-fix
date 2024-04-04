@@ -19,11 +19,13 @@
     ]]>
     </description>
 
-    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
+    <!-- https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html -->
     <idea-version since-build="233.11799.241"/>
 
-    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+    <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <!-- https://github.com/dkandalov/quick-fix/issues/1 -->
+    <incompatible-with>com.intellij.modules.rider</incompatible-with>
 
     <extensions defaultExtensionNs="com.intellij">
         <registryKey key="quickfix-plugin.intentionPriorities" defaultValue="" description="..."/>
