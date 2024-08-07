@@ -84,7 +84,7 @@ class QuickFixConfig : Disposable {
 }
 
 private fun IntentionAction.canBeInvoked() =
-    (this as? CustomizableIntentionAction)?.isSelectable ?: true &&
+    (this as? CustomizableIntentionAction)?.isSelectable != false &&
     (this as? IntentionActionDelegate)?.delegate !is AbstractEmptyIntentionAction
 
 private val AnActionEvent.currentPsiFile: PsiFile?
