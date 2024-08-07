@@ -1,13 +1,10 @@
 [![Build Status](https://github.com/dkandalov/quick-fix/workflows/CI/badge.svg)](https://github.com/dkandalov/quick-fix/actions)
 
-This is a plugin for IntelliJ IDEs which:
-1. Adds `Quick Fix` action to apply the first available quick fix because `alt+enter, enter` 
-   is too many key presses when you already know that the top inspection will do what you want.
-2. ~~Registers all available intentions as actions, so you can assign shortcuts to them~~ 
-  Fixed in [this IntelliJ issue](https://youtrack.jetbrains.com/issue/IDEA-217465).
+This is a plugin for IntelliJ IDEs with `Quick Fix` action which applies the top intention/inspection
+because life is too short to press `alt+enter, enter` when you already know it will do the right thing.
 
-As an experiment `Quick Fix` action is assigned to `F1` because it's a single key and located near `F2 - Next Highlighted Error`.
-You might need to un-assign `F1` from the `Context Help` action which is mostly useless anyway.
+The best shortcut for `Quick Fix` is `F1` because it's a single key and located near `F2 - Next Highlighted Error`.
+But you might need to un-assign `F1` from the `Context Help` action which is mostly useless anyway.
 
 ### Re-Prioritising intentions
 You can configure `Quick Fix` to re-prioritise intentions by using the `quickfix-plugin.intentionPriorities` key in IDE `Registry`
