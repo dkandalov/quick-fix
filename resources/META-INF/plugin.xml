@@ -20,7 +20,7 @@
     </description>
 
     <!-- https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html -->
-    <idea-version since-build="233.11799.241"/>
+    <idea-version since-build="241.14494"/>
 
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>

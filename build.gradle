@@ -40,7 +40,7 @@ intellij {
 	// To find available IDE versions see https://www.jetbrains.com/intellij-repository/releases
 	// and https://www.jetbrains.com/intellij-repository/snapshots
 	version = System.getenv().getOrDefault("IJ_VERSION",
-			"233.11799.241", // Version after EAP which has ShowIntentionActionsHandler.calcCachedIntentions()
+		"241.14494.240", // IntelliJ 2024.1
 //			"LATEST-EAP-SNAPSHOT"
 	)
 	downloadSources = true
