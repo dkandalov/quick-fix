@@ -41,6 +41,40 @@ class QuickFixAction : AnAction() {
         // and then applying QuickFix sort won't work, because in this case QuickFix sort can put intentions above errors, etc.
         // This will also require copy-pasting private sorting code from CachedIntentions.)
         val allActions = cachedIntentions.allActions
+
+        val docChars = editor.document.charsSequence
+        val offset = editor.caretModel.offset
+        val currentChar = docChars[offset]
+        val previousChar = if (offset >= 2) docChars[offset - 1] else null
+        val currentWord =
+            docChars.subSequence(
+                (0..offset).reversed().takeWhile { docChars[it].isLetter() }.lastOrNull() ?: offset,
+                ((offset..offset + 100).takeWhile { docChars[it].isLetter() }.lastOrNull() ?: offset) + 1
+            )
+
+        val startOfWord = currentChar.isLetter() && (previousChar == null || previousChar.isWhitespace())
+        val nearParens = currentChar == '(' || previousChar == '('
+
+        fun IntentionActionWithTextCaching.quickFixPriority(): Int {
+            quickFixConfig.priorityOf(action.text)?.let { return it }
+
+            val highPriority = Int.MIN_VALUE
+            val lowPriority = Int.MAX_VALUE
+            val sanitisedText = text.replace(Regex("Import members from .*"), "Import members from...")
+            return when (sanitisedText) {
+                "Introduce local variable" -> if (startOfWord) 0 else lowPriority
+                "Import members from..." -> if (startOfWord) 1 else 0
+                "Add names to call arguments" -> if (nearParens) 0 else lowPriority
+                "Replace 'it' with explicit parameter" -> if (currentWord == "it") highPriority else 0
+                "Replace with '-'" -> if (currentWord == "minus") highPriority else 0
+                "Replace with '+'" -> if (currentWord == "plus") highPriority else 0
+                "Convert concatenation to template" -> if (currentChar == '+') highPriority else 0
+                "Remove redundant 'this'" -> if (currentWord == "this") highPriority else 0
+                "Add explicit 'this'" -> lowPriority
+                else -> 0
+            }
+        }
+
         val fix = allActions
             .reorderSublist(allActions.subsetOf(cachedIntentions.errorFixes).sortedBy { it.quickFixPriority() })
             .reorderSublist(allActions.subsetOf(cachedIntentions.inspectionFixes).sortedBy { it.quickFixPriority() })
@@ -54,9 +88,6 @@ class QuickFixAction : AnAction() {
     }
 
     private val quickFixConfig = service<QuickFixConfig>()
-
-    private fun IntentionActionWithTextCaching.quickFixPriority() =
-        quickFixConfig.priorityOf(action.text)
 }
 
 @Service
@@ -71,8 +102,8 @@ class QuickFixConfig : Disposable {
 
     private var intentionPriorities = registryValue.toIntentionPriorityMap()
 
-    fun priorityOf(intentionName: String): Int =
-        intentionPriorities[intentionName] ?: (intentionPriorities["*"] ?: -1)
+    fun priorityOf(intentionName: String): Int? =
+        intentionPriorities[intentionName] ?: intentionPriorities["*"]
 
     private fun RegistryValue.toIntentionPriorityMap() =
         asString().split(";")
