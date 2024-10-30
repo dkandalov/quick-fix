@@ -39,10 +39,8 @@ compileKotlin {
 intellij {
 	// To find available IDE versions see https://www.jetbrains.com/intellij-repository/releases
 	// and https://www.jetbrains.com/intellij-repository/snapshots
-	version = System.getenv().getOrDefault("IJ_VERSION",
-		"241.14494.240", // IntelliJ 2024.1
-//			"LATEST-EAP-SNAPSHOT"
-	)
+	version = "241.14494.240" // IntelliJ 2024.1
+	// version = "LATEST-EAP-SNAPSHOT"
 	downloadSources = true
 	sameSinceUntilBuild = false
 	updateSinceUntilBuild = false
