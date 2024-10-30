@@ -42,8 +42,10 @@ class QuickFixAction : AnAction() {
         // This will also require copy-pasting private sorting code from CachedIntentions.)
         val allActions = cachedIntentions.allActions
 
-        val docChars = editor.document.charsSequence
+        val docChars = editor.document.immutableCharSequence
         val offset = editor.caretModel.offset
+        if (offset >= docChars.length) return
+
         val currentChar = docChars[offset]
         val previousChar = if (offset >= 2) docChars[offset - 1] else null
         val currentWord =
