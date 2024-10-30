@@ -47,6 +47,9 @@ class QuickFixAction : AnAction() {
         if (offset >= docChars.length) return
 
         val currentChar = docChars[offset]
+        val lineStartOffset = editor.document.getLineStartOffset(editor.document.getLineNumber(offset))
+        val startOfCodeOnTheLine = (lineStartOffset..<offset).all { docChars[it].isWhitespace() }
+
         val previousChar = if (offset >= 2) docChars[offset - 1] else null
         val currentWord =
             docChars.subSequence(
@@ -64,15 +67,18 @@ class QuickFixAction : AnAction() {
             val lowPriority = Int.MAX_VALUE
             val sanitisedText = text.replace(Regex("Import members from .*"), "Import members from...")
             return when (sanitisedText) {
-                "Introduce local variable" -> if (startOfWord) 0 else lowPriority
+                "Introduce local variable" -> if (startOfCodeOnTheLine) 0 else lowPriority
                 "Import members from..." -> if (startOfWord) 1 else 0
                 "Add names to call arguments" -> if (nearParens) 0 else lowPriority
                 "Replace 'it' with explicit parameter" -> if (currentWord == "it") highPriority else 0
                 "Replace with '-'" -> if (currentWord == "minus") highPriority else 0
                 "Replace with '+'" -> if (currentWord == "plus") highPriority else 0
+                "Replace with a 'forEach' function call" -> if (currentWord == "for") highPriority else 0
                 "Convert concatenation to template" -> if (currentChar == '+') highPriority else 0
                 "Remove redundant 'this'" -> if (currentWord == "this") highPriority else 0
+                "Remove unnecessary parenthesis'" -> highPriority
                 "Add explicit 'this'" -> lowPriority
+                "Iterate over 'String'" -> lowPriority
                 else -> 0
             }
         }
