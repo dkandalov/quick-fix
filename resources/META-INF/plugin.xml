@@ -29,6 +29,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <registryKey key="quickfix-plugin.intentionPriorities" defaultValue="" description="..."/>
+        <registryKey key="quickfix-plugin.enableHeuristics" defaultValue="true" description="Enable heuristics to re-prioritise intentions"/>
     </extensions>
 
     <actions>

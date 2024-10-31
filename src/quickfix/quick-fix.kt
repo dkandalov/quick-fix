@@ -62,6 +62,7 @@ class QuickFixAction : AnAction() {
 
         fun IntentionActionWithTextCaching.quickFixPriority(): Int {
             quickFixConfig.priorityOf(action.text)?.let { return it }
+            if (!quickFixConfig.enableHeuristics) return 0
 
             val highPriority = Int.MIN_VALUE
             val lowPriority = Int.MAX_VALUE
@@ -100,15 +101,23 @@ class QuickFixAction : AnAction() {
 
 @Service
 class QuickFixConfig : Disposable {
-    private val registryValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
+    private val intentionPrioritiesValue: RegistryValue = Registry.get("quickfix-plugin.intentionPriorities").also {
         it.addListener(object : RegistryValueListener {
             override fun afterValueChanged(value: RegistryValue) {
                 intentionPriorities = value.toIntentionPriorityMap()
             }
         }, this)
     }
+    private val enableHeuristicsValue: RegistryValue = Registry.get("quickfix-plugin.enableHeuristics").also {
+        it.addListener(object : RegistryValueListener {
+            override fun afterValueChanged(value: RegistryValue) {
+                enableHeuristics = value.asBoolean()
+            }
+        }, this)
+    }
 
-    private var intentionPriorities = registryValue.toIntentionPriorityMap()
+    private var intentionPriorities = intentionPrioritiesValue.toIntentionPriorityMap()
+    var enableHeuristics = enableHeuristicsValue.asBoolean()
 
     fun priorityOf(intentionName: String): Int? =
         intentionPriorities[intentionName] ?: intentionPriorities["*"]
